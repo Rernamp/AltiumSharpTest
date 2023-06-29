@@ -1,0 +1,13 @@
+*.Harness
+.vs
+Sheet1.~(1).SchDoc.Zip
+Sheet1.~(2).SchDoc.Zip
+Sheet1.~(3).SchDoc.Zip
+Sheet1.~(4).SchDoc.Zip
+Sheet1.~(5).SchDoc.Zip
+Sheet1.~(6).SchDoc.Zip
+Sheet2.~(1).SchDoc.Zip
+Test.~(1).PrjPcb.Zip
+Test.~(2).PrjPcb.Zip
+Sheet1.SchDocPreview
+Sheet2.SchDocPreview

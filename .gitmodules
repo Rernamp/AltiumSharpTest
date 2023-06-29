@@ -1,0 +1,3 @@
+[submodule "Dependencies/AltiumSharp"]
+	path = Dependencies/AltiumSharp
+	url = https://github.com/Rernamp/AltiumSharp.git
