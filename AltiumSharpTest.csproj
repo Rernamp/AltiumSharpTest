@@ -7,9 +7,27 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Dependencies\AltiumSharp\AltiumSharp\Drawing\**" />
+    <Compile Remove="Dependencies\AltiumSharp\LibraryViewer\**" />
+    <EmbeddedResource Remove="Dependencies\AltiumSharp\AltiumSharp\Drawing\**" />
+    <EmbeddedResource Remove="Dependencies\AltiumSharp\LibraryViewer\**" />
+    <None Remove="Dependencies\AltiumSharp\AltiumSharp\Drawing\**" />
+    <None Remove="Dependencies\AltiumSharp\LibraryViewer\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Dependencies\AltiumSharp\AltiumSharp\PcbData.cs" />
+    <Compile Remove="Dependencies\AltiumSharp\AltiumSharp\PcbLib.cs" />
+    <Compile Remove="Dependencies\AltiumSharp\AltiumSharp\PcbLibReader.cs" />
+    <Compile Remove="Dependencies\AltiumSharp\AltiumSharp\PcbLibWriter.cs" />
+  </ItemGroup>
+
 	<ItemGroup>
-	  <PackageReference Include="OpenMcdf" Version="2.3.0" />
-	  <PackageReference Include="OriginalCircuit.AltiumSharp" Version="1.0.0" />
-	</ItemGroup>
+		<PackageReference Include="OpenMcdf" Version="2.2.1.12" />
+		<PackageReference Include="System.Drawing.Common" Version="7.0.0" />
+		<PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
+		
+	</ItemGroup>	
 
 </Project>

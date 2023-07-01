@@ -11,3 +11,14 @@ Test.~(1).PrjPcb.Zip
 Test.~(2).PrjPcb.Zip
 Sheet1.SchDocPreview
 Sheet2.SchDocPreview
+*.json
+*.dll
+*.exe
+*.pdb
+*.props
+*.targets
+*.cs
+*.cache
+*.editorconfig
+*.CopyComplete
+*.txt
