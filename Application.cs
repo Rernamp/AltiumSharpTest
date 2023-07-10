@@ -35,6 +35,21 @@ namespace AltiumSharpTest {
 
             var mapPinToWire = utils.getMapPinToWire(gpioPin);
             var mapWireToNet = utils.getMapWireToNet(mapPinToWire.Values.ToList());
+
+            var mapPinToNet = new Dictionary<SchPin, SchNetLabel>();
+
+            foreach (var pinToWire in mapPinToWire) {
+                if (mapWireToNet.ContainsKey(pinToWire.Value)) {
+                    mapPinToNet.Add(pinToWire.Key, mapWireToNet[pinToWire.Value]);
+                }
+            }
+
+            foreach (var pinToNet in mapPinToNet) {
+                Console.WriteLine($"Pin: {pinToNet.Key.Name} is Net: {pinToNet.Value.Text}");
+            }
+
+
+
         }
 
         public readonly string PathToSchDoc;        
