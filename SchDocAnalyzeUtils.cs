@@ -120,16 +120,13 @@ namespace AltiumSharpTest {
         public List<SchWire> findWiresConnectedToWire(SchWire wire) {
             var result = new List<SchWire>();
 
-            var findAndAddToListWire = (CoordPoint point) => {
-                var wireConnectedToPoint = findWiresContainingPoint(point);
+            foreach (var pointOfWire in wire.Vertices) {
+                var wireConnectedToPoint = findWiresContainingPoint(pointOfWire);
                 if ((wireConnectedToPoint.Count != 0)) {
                     wireConnectedToPoint.RemoveAll(value => value == wire);
                     result.AddRange(wireConnectedToPoint);
                 }
-            };
-
-            findAndAddToListWire(wire.Vertices.First());
-            findAndAddToListWire(wire.Vertices.Last());
+            }
 
             return result;
         }
@@ -182,6 +179,12 @@ namespace AltiumSharpTest {
                     }
                 }
             }
+
+            return result;
+        }
+
+        public List<SchComponent> getComponentsConnectedToNetLabel(SchNetLabel netLaber) {
+            List<SchComponent> result = new();
 
             return result;
         }
