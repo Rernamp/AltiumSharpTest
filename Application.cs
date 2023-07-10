@@ -25,7 +25,16 @@ namespace AltiumSharpTest {
 
             var pins = utils.getConnectedPinToComponent(mcu);
 
-            var mapPinToWire = utils.getMapPinToWire(pins);
+            List<SchPin> gpioPin = new();
+
+            foreach (var pin in pins) {
+                if (pin.Name[0] == 'P') {
+                    gpioPin.Add(pin);
+                }
+            }
+
+            var mapPinToWire = utils.getMapPinToWire(gpioPin);
+            var mapWireToNet = utils.getMapWireToNet(mapPinToWire.Values.ToList());
         }
 
         public readonly string PathToSchDoc;        

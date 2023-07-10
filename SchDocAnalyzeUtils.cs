@@ -16,6 +16,7 @@ namespace AltiumSharpTest {
             foreach (var element in schDoc.Items) {
                 addElementToList(element, components);
                 addElementToList(element, wires);
+                addElementToList(element, netLabels);
             }
 
         }
@@ -62,10 +63,11 @@ namespace AltiumSharpTest {
             SchWire result = null;
 
             var endOfPin = pin.Location;
+            int addedValue = (pin.Orientation.HasFlag(TextOrientations.Flipped) ? -pin.PinLength : pin.PinLength);
             if (pin.Orientation.HasFlag(TextOrientations.Rotated)) {
-                endOfPin = new CoordPoint(endOfPin.X, endOfPin.Y + (pin.Orientation.HasFlag(TextOrientations.Flipped) ? -pin.PinLength : pin.PinLength));
+                endOfPin = new CoordPoint(endOfPin.X, endOfPin.Y + addedValue);
             } else {
-                endOfPin = new CoordPoint(endOfPin.X + (pin.Orientation.HasFlag(TextOrientations.Flipped) ? -pin.PinLength : pin.PinLength), endOfPin.Y);
+                endOfPin = new CoordPoint(endOfPin.X + addedValue, endOfPin.Y);
             }
 
             foreach (var wire in wires) {
@@ -84,6 +86,36 @@ namespace AltiumSharpTest {
             return result;
         }
 
+        public Dictionary<SchWire, SchNetLabel> getMapWireToNet(List<SchWire> wires) {
+            Dictionary<SchWire, SchNetLabel> result = new();
+
+            foreach (var wire in wires) {
+                for (int i = 0; i < wire.Vertices.Count - 1; i++) {
+                    var netLabel = findNetLabelConnectedToWire(wire.Vertices[i], wire.Vertices[i + 1]);
+                    if (netLabel != null) {
+                        result.Add(wire, netLabel);
+                        break;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public SchNetLabel? findNetLabelConnectedToWire(CoordPoint point1, CoordPoint point2) {
+            SchNetLabel result = null;
+
+            if (point1.X > point2.X) {
+                //(point1.X, point2.X) = (point2.X, point1.X);
+            }
+            
+            foreach (var netLabel in netLabels) {
+
+            }
+
+            return result;
+        }
+
 
 
         private void addElementToList<T>(SchPrimitive element, List<T> container) {
@@ -96,5 +128,6 @@ namespace AltiumSharpTest {
 
         public List<SchComponent> components = new();
         public List<SchWire> wires = new();
+        public List<SchNetLabel>  netLabels = new();
     }
 }
