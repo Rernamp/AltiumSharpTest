@@ -19,6 +19,8 @@ namespace AltiumSharpTest {
                 addElementToList(element, components);
                 addElementToList(element, wires);
                 addElementToList(element, netLabels);
+                addElementToList(element, ports);
+                
             }
 
         }
@@ -200,5 +202,6 @@ namespace AltiumSharpTest {
         public List<SchComponent> components = new();
         public List<SchWire> wires = new();
         public List<SchNetLabel>  netLabels = new();
+        public List<SchPort> ports = new();
     }
 }
