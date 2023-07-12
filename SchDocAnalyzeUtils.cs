@@ -80,18 +80,19 @@ namespace AltiumSharpTest {
             return endOfPin;
         }
 
-        public HashSet<SchWire> findWiresContainingPoint(CoordPoint point) {
+        public HashSet<SchWire> findWiresContainingPoint(CoordPoint point, SchWire excludeWire = null) {
             HashSet<SchWire>? result = new();
 
             foreach (var wire in wires) {
                 for (int i = 0; i < wire.Vertices.Count - 1; i++) {
                     if (pointIsOnLine(wire.Vertices[i], wire.Vertices[i + 1], point)) {
-                        result.Add(wire);
+                        if (wire != excludeWire) {
+                            result.Add(wire);
+                        }
+                        
                     }
                 }
             }
-
-
 
             return result;
         }
@@ -125,14 +126,18 @@ namespace AltiumSharpTest {
             return result;
         }
 
-        public List<SchWire> findWiresConnectedToWire(SchWire wire) {
-            var result = new List<SchWire>();
+        public HashSet<SchWire> findWiresConnectedToWire(SchWire wire) {
+            var result = new HashSet<SchWire>();
 
             foreach (var pointOfWire in wire.Vertices) {
-                var wireConnectedToPoint = findWiresContainingPoint(pointOfWire);
-                if ((wireConnectedToPoint.Count != 0)) {
-                    wireConnectedToPoint.RemoveWhere(value => value == wire);
-                    result.AddRange(wireConnectedToPoint);
+                foreach (var searchWire in wires) { 
+                    if (wire != searchWire) {
+                        foreach (var point in searchWire.Vertices) {
+                            if (point == pointOfWire) {
+                                result.Add(searchWire);
+                            }
+                        }
+                    }
                 }
             }
 
@@ -209,16 +214,55 @@ namespace AltiumSharpTest {
                 }
             }
 
-            List<SchWire> wiresConnectedToThisNet = new();
+            HashSet<SchWire> wiresConnectedToThisNet = new();
 
             foreach (var netLabel in allNetLabelsWithThisName) {
-                var wiresConnectedToNet = findWiresContainingPoint(netLabel.Location);
-                wiresConnectedToThisNet.AddRange(wiresConnectedToNet);
+                var wiresConnectedToNet = findWiresContainingNetLabel(netLabel);
+                foreach (var element in wiresConnectedToNet) {
+                    wiresConnectedToThisNet.Add(element);
+                }
             }
             
             foreach (var wire in wiresConnectedToThisNet) {
                 var mapPinToComponentsConnectedToWire = findMapPinToComponentsConnectedToWire(wire);
                 result = result.Concat(mapPinToComponentsConnectedToWire).ToDictionary(x => x.Key, x => x.Value);
+            }
+
+            return result;
+        }
+
+        public HashSet<SchWire> findWiresContainingNetLabel(SchNetLabel net) {
+            HashSet<SchWire> result = new();
+
+            var wiresConnectToNetPoint = findWiresContainingPoint(net.Location);
+
+            foreach (var wire in wiresConnectToNetPoint) {
+                result.Add(wire);
+                var wireConnectedToCurrentWire = recursiveFindWiresConnectedToWire(wire);
+                foreach (var addedWire in wireConnectedToCurrentWire) {
+                    result.Add(addedWire);
+                }
+            }
+
+            return result;
+        }
+
+        public HashSet<SchWire> recursiveFindWiresConnectedToWire(SchWire wire, SchWire excludeWire = null) {
+            var result = new HashSet<SchWire>();
+
+            var wiresConnectedToWire = findWiresConnectedToWire(wire);
+
+            if (excludeWire != null) { 
+                wiresConnectedToWire.RemoveWhere(x => x == excludeWire);
+            }
+
+            foreach (var wireConnectedToWire in wiresConnectedToWire) {
+                result.Add(wireConnectedToWire);
+
+                var findWires = recursiveFindWiresConnectedToWire(wireConnectedToWire, wire);
+                foreach (var findWire in findWires) {
+                    result.Add(findWire);
+                }
             }
 
             return result;
