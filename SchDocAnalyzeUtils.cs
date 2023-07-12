@@ -80,17 +80,18 @@ namespace AltiumSharpTest {
             return endOfPin;
         }
 
-        public List<SchWire> findWiresContainingPoint(CoordPoint point) { 
-            List<SchWire>? result = new();
+        public HashSet<SchWire> findWiresContainingPoint(CoordPoint point) {
+            HashSet<SchWire>? result = new();
 
             foreach (var wire in wires) {
-                for (int i = 0; i < wire.Vertices.Count; i++) {
-
-                    if ((point == wire.Vertices[i])) {
+                for (int i = 0; i < wire.Vertices.Count - 1; i++) {
+                    if (pointIsOnLine(wire.Vertices[i], wire.Vertices[i + 1], point)) {
                         result.Add(wire);
                     }
                 }
             }
+
+
 
             return result;
         }
@@ -130,7 +131,7 @@ namespace AltiumSharpTest {
             foreach (var pointOfWire in wire.Vertices) {
                 var wireConnectedToPoint = findWiresContainingPoint(pointOfWire);
                 if ((wireConnectedToPoint.Count != 0)) {
-                    wireConnectedToPoint.RemoveAll(value => value == wire);
+                    wireConnectedToPoint.RemoveWhere(value => value == wire);
                     result.AddRange(wireConnectedToPoint);
                 }
             }
@@ -155,8 +156,21 @@ namespace AltiumSharpTest {
         public SchNetLabel? findNetOnLine(CoordPoint point, CoordPoint nextPoint) {
             SchNetLabel result = null;
 
-            Point point1 = new Point(point.X.ToInt32(), point.Y.ToInt32());
-            Point point2 = new Point(nextPoint.X.ToInt32(), nextPoint.Y.ToInt32());
+            foreach (var netLabel in netLabels) {
+                if (pointIsOnLine(point, nextPoint, netLabel.Location)) {
+                    result = netLabel;
+                    break;
+                }                
+            }
+
+            return result;
+        }
+
+        public bool pointIsOnLine(CoordPoint firstPointLine, CoordPoint secondPointLine, CoordPoint targetPoint) {
+            bool result = false;
+
+            Point point1 = new Point(firstPointLine.X.ToInt32(), firstPointLine.Y.ToInt32());
+            Point point2 = new Point(secondPointLine.X.ToInt32(), secondPointLine.Y.ToInt32());
             bool steep = false;
             if (Math.Abs(point1.X - point2.X) < Math.Abs(point1.Y - point2.Y)) {
                 (point1.X, point1.Y) = (point1.Y, point1.X);
@@ -169,22 +183,16 @@ namespace AltiumSharpTest {
                 (point1.Y, point2.Y) = (point2.Y, point1.Y);
             }
 
-            foreach (var netLabel in netLabels) {
-
-                var pointOfNet = new Point(netLabel.Location.X.ToInt32(), netLabel.Location.Y.ToInt32());
-                if (steep) {
-                    (pointOfNet.X, pointOfNet.Y) = (pointOfNet.Y, pointOfNet.X);
-                }
-                if ((Utils.IsWithin(pointOfNet.X, point1.X, point2.X)) &&
-                    (Utils.IsWithin(pointOfNet.Y, point1.Y, point2.Y))) {
-                    var firstVector = new Point(point1.X - pointOfNet.X, point1.Y - pointOfNet.Y);
-                    var secondVector = new Point(point2.X - pointOfNet.X, point2.Y - pointOfNet.Y);
-                    var pseudoscalar = (firstVector.X) * (secondVector.Y) - (firstVector.Y) * (secondVector.X);
-                    if (pseudoscalar == 0) {
-                        result = netLabel;
-                        break;
-                    }
-                }
+            var target = new Point(targetPoint.X.ToInt32(), targetPoint.Y.ToInt32());
+            if (steep) {
+                (target.X, target.Y) = (target.Y, target.X);
+            }
+            if ((Utils.IsWithin(target.X, point1.X, point2.X)) &&
+                (Utils.IsWithin(target.Y, point1.Y, point2.Y))) {
+                var firstVector = new Point(point1.X - target.X, point1.Y - target.Y);
+                var secondVector = new Point(point2.X - target.X, point2.Y - target.Y);
+                var pseudoscalar = (firstVector.X) * (secondVector.Y) - (firstVector.Y) * (secondVector.X);
+                result = pseudoscalar == 0;
             }
 
             return result;
@@ -204,9 +212,10 @@ namespace AltiumSharpTest {
             List<SchWire> wiresConnectedToThisNet = new();
 
             foreach (var netLabel in allNetLabelsWithThisName) {
-                wiresConnectedToThisNet.AddRange(findWiresContainingPoint(netLabel.Location));
-            }            
-
+                var wiresConnectedToNet = findWiresContainingPoint(netLabel.Location);
+                wiresConnectedToThisNet.AddRange(wiresConnectedToNet);
+            }
+            
             foreach (var wire in wiresConnectedToThisNet) {
                 var mapPinToComponentsConnectedToWire = findMapPinToComponentsConnectedToWire(wire);
                 result = result.Concat(mapPinToComponentsConnectedToWire).ToDictionary(x => x.Key, x => x.Value);
