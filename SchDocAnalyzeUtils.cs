@@ -63,7 +63,12 @@ namespace AltiumSharpTest {
             return result;
         }
 
-        public SchWire findWireConnectedToPin(SchPin pin) {            
+        public SchWire findWireConnectedToPin(SchPin pin) {
+            var endOfPin = getEndOfPin(pin);
+            return findWireContainingPoint(endOfPin);
+        }
+
+        public CoordPoint getEndOfPin(SchPin pin) {
             var endOfPin = pin.Location;
             int addedValue = (pin.Orientation.HasFlag(TextOrientations.Flipped) ? -pin.PinLength : pin.PinLength);
             if (pin.Orientation.HasFlag(TextOrientations.Rotated)) {
@@ -71,8 +76,8 @@ namespace AltiumSharpTest {
             } else {
                 endOfPin = new CoordPoint(endOfPin.X + addedValue, endOfPin.Y);
             }
-
-            return findWireContainingPoint(endOfPin);
+                
+            return endOfPin;
         }
 
         public List<SchWire> findWiresContainingPoint(CoordPoint point) { 
@@ -185,11 +190,52 @@ namespace AltiumSharpTest {
             return result;
         }
 
-        public List<SchComponent> getComponentsConnectedToNetLabel(SchNetLabel netLaber) {
-            List<SchComponent> result = new();
+        public Dictionary<SchPin, SchComponent> findMapPinToComponentsConnectedToNet(SchNetLabel net) {
+            Dictionary<SchPin, SchComponent> result = new();
+
+            List<SchNetLabel> allNetLabelsWithThisName = new();
+
+            foreach (var schNetLabel in netLabels) {
+                if (schNetLabel.Text == net.Text) {
+                    allNetLabelsWithThisName.Add(schNetLabel);
+                }
+            }
+
+            List<SchWire> wiresConnectedToThisNet = new();
+
+            foreach (var netLabel in allNetLabelsWithThisName) {
+                wiresConnectedToThisNet.AddRange(findWiresContainingPoint(netLabel.Location));
+            }            
+
+            foreach (var wire in wiresConnectedToThisNet) {
+                var mapPinToComponentsConnectedToWire = findMapPinToComponentsConnectedToWire(wire);
+                result = result.Concat(mapPinToComponentsConnectedToWire).ToDictionary(x => x.Key, x => x.Value);
+            }
 
             return result;
         }
+
+        public Dictionary<SchPin, SchComponent> findMapPinToComponentsConnectedToWire(SchWire wire) {
+            Dictionary<SchPin, SchComponent> result = new();
+
+            foreach (var component in components) {
+                foreach (var primitive in component.Primitives) {
+                    if (primitive is SchPin pin) {
+                        var endOfPin = getEndOfPin(pin);
+                        foreach (var pointOfWire in wire.Vertices) {
+                            if (endOfPin == pointOfWire) {
+                                result.Add(pin, component);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            return result;
+        }
+
 
         private void addElementToList<T>(SchPrimitive element, List<T> container) {
             if (element is T TElement) {

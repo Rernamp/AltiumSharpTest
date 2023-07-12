@@ -48,8 +48,13 @@ namespace AltiumSharpTest {
                 Console.WriteLine($"Pin: {pinToNet.Key.Name} is Net: {pinToNet.Value.Text}");
             }
 
+            foreach (var net in mapPinToNet.Values) {
+                var components = utils.findMapPinToComponentsConnectedToNet(net);
 
-
+                foreach (var component in components) {
+                    Console.WriteLine($"Net: {net.Text} connected to pin {component.Key.Name} of component {component.Value.DesignItemId}");
+                }
+            }
         }
 
         public readonly string PathToSchDoc;        
