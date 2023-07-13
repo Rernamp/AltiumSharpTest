@@ -20,7 +20,16 @@ namespace AltiumSharpTest {
                 addElementToList(element, wires);
                 addElementToList(element, netLabels);
                 addElementToList(element, ports);
-                
+                if (element is SchHarnessConnector connector) {
+                    harnessConnectors.Add(new HarnessConnector(connector));
+                }
+
+                if (element is SchHarnessEntry harnessEntry) {
+                    harnessConnectors.Last().addEntry(harnessEntry);
+                }
+                if (element is SchHarnessType harnessType) {
+                    harnessConnectors.Last().type = harnessType;
+                }
             }
 
         }
@@ -226,6 +235,19 @@ namespace AltiumSharpTest {
             foreach (var wire in wiresConnectedToThisNet) {
                 var mapPinToComponentsConnectedToWire = findMapPinToComponentsConnectedToWire(wire);
                 result = result.Concat(mapPinToComponentsConnectedToWire).ToDictionary(x => x.Key, x => x.Value);
+                var harnessConnectedToWire = findHarnessConnectedToWire(wire);
+            }
+
+            
+
+            return result;
+        }
+
+        private HashSet<SchHarnessEntry> findHarnessConnectedToWire(SchWire wire) {
+            HashSet<SchHarnessEntry> result = new();
+
+            foreach (var harnessConnector in harnessConnectors) {
+                
             }
 
             return result;
@@ -302,5 +324,6 @@ namespace AltiumSharpTest {
         public List<SchWire> wires = new();
         public List<SchNetLabel>  netLabels = new();
         public List<SchPort> ports = new();
+        public List<HarnessConnector> harnessConnectors = new();
     }
 }
