@@ -235,7 +235,11 @@ namespace AltiumSharpTest {
             foreach (var wire in wiresConnectedToThisNet) {
                 var mapPinToComponentsConnectedToWire = findMapPinToComponentsConnectedToWire(wire);
                 result = result.Concat(mapPinToComponentsConnectedToWire).ToDictionary(x => x.Key, x => x.Value);
-                var harnessConnectedToWire = findHarnessConnectedToWire(wire);
+                var mapHarnessEntryToharnessConnectedToWire = findHarnessConnectedToWire(wire);
+
+                foreach (var harnessEntryToharnessConnectedToWire in mapHarnessEntryToharnessConnectedToWire) {
+
+                }
             }
 
             
@@ -243,11 +247,18 @@ namespace AltiumSharpTest {
             return result;
         }
 
-        private HashSet<SchHarnessEntry> findHarnessConnectedToWire(SchWire wire) {
-            HashSet<SchHarnessEntry> result = new();
+        private Dictionary<SchHarnessEntry, HarnessConnector> findHarnessConnectedToWire(SchWire wire) {
+            Dictionary<SchHarnessEntry, HarnessConnector> result = new();
 
             foreach (var harnessConnector in harnessConnectors) {
-                
+                foreach (var entryToCoordinate in harnessConnector.mapEntryToCoordinate) {
+                    foreach (var coordinateOfWire in wire.Vertices) {
+                        if (coordinateOfWire == entryToCoordinate.Value) {
+                            result.Add(entryToCoordinate.Key, harnessConnector);
+                            break;
+                        }
+                    }
+                }                
             }
 
             return result;
