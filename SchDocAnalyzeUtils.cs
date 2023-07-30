@@ -20,6 +20,8 @@ namespace AltiumSharpTest {
                 addElementToList(element, wires);
                 addElementToList(element, netLabels);
                 addElementToList(element, ports);
+                addElementToList(element, signalHarnesses);
+                
                 if (element is SchHarnessConnector connector) {
                     harnessConnectors.Add(new HarnessConnector(connector));
                 }
@@ -238,7 +240,10 @@ namespace AltiumSharpTest {
                 var mapHarnessEntryToharnessConnectedToWire = findHarnessConnectedToWire(wire);
 
                 foreach (var harnessEntryToharnessConnectedToWire in mapHarnessEntryToharnessConnectedToWire) {
-
+                    var signalHarnesses = findSignalHarnessContaingPoint(harnessEntryToharnessConnectedToWire.Value.type.Location);
+                    foreach (var signalHarness in signalHarnesses) {
+                        Debugger.Break();
+                    }
                 }
             }
 
@@ -264,6 +269,7 @@ namespace AltiumSharpTest {
             return result;
         }
 
+
         public HashSet<SchWire> findWiresContainingNetLabel(SchNetLabel net) {
             HashSet<SchWire> result = new();
 
@@ -279,6 +285,26 @@ namespace AltiumSharpTest {
 
             return result;
         }
+
+
+        public HashSet<SchSignalHarness> findSignalHarnessContaingPoint(CoordPoint point, SchSignalHarness excludeSignal = null) {
+            HashSet<SchSignalHarness> result = new();
+
+            foreach (var signalHarnes in signalHarnesses) {
+                if (excludeSignal == signalHarnes) {
+                    continue;
+                }
+                foreach (var pointOfSignalHarnes in signalHarnes.Vertices) {
+                    if (pointOfSignalHarnes == point) {
+                        result.Add(signalHarnes);
+                        break;
+                    }
+                }
+            }
+
+            return result;
+        }
+
 
         public HashSet<SchWire> recursiveFindWiresConnectedToWire(SchWire wire, SchWire excludeWire = null) {
             var result = new HashSet<SchWire>();
@@ -336,5 +362,6 @@ namespace AltiumSharpTest {
         public List<SchNetLabel>  netLabels = new();
         public List<SchPort> ports = new();
         public List<HarnessConnector> harnessConnectors = new();
+        public List<SchSignalHarness> signalHarnesses = new();
     }
 }
