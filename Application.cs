@@ -14,47 +14,23 @@ namespace AltiumSharpTest {
             PathToSchDoc = pathToSchDoc;
         }
 
+        //public SchComponent findMcu(string designItemId = "nRF52833_QDAA") {
+        //    SchComponent result = null;
+        //    foreach (var schComponent in components) {
+        //        if (schComponent.DesignItemId == "nRF52833_QDAA") {
+        //            result = schComponent;
+        //            break;
+        //        }
+        //    }
+
+        //    return result;
+        //}
+
         public void run() {
             SchDocReader schDocReader = new SchDocReader();
 
             var schDoc = schDocReader.Read(PathToSchDoc);
 
-            SchDocAnalyzeUtils utils = new SchDocAnalyzeUtils(schDoc);
-
-            var mcu = utils.findMcu();
-
-            var pins = utils.getConnectedPinToComponent(mcu);
-
-            List<SchPin> gpioPin = new();
-
-            foreach (var pin in pins) {
-                if (pin.Name[0] == 'P') {
-                    gpioPin.Add(pin);
-                }
-            }
-
-            var mapPinToWire = utils.getMapPinToWire(gpioPin);
-            var mapWireToNet = utils.getMapWireToNet(mapPinToWire.Values.ToList());
-
-            var mapPinToNet = new Dictionary<SchPin, SchNetLabel>();
-
-            foreach (var pinToWire in mapPinToWire) {
-                if (mapWireToNet.ContainsKey(pinToWire.Value)) {
-                    mapPinToNet.Add(pinToWire.Key, mapWireToNet[pinToWire.Value]);
-                }
-            }
-
-            foreach (var pinToNet in mapPinToNet) {
-                Console.WriteLine($"Pin: {pinToNet.Key.Name} is Net: {pinToNet.Value.Text}");
-            }
-
-            foreach (var net in mapPinToNet.Values) {
-                var components = utils.findMapPinToComponentsConnectedToNet(net);
-
-                foreach (var component in components) {
-                    Console.WriteLine($"Net: {net.Text} connected to pin {component.Key.Name} of component {component.Value.DesignItemId}");
-                }
-            }
         }
 
         public readonly string PathToSchDoc;        
